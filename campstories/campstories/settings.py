@@ -13,8 +13,19 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 
+import os
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+
+import asyncio
+asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+
+ASGI_APPLICATION = 'campstories.asgi.application'
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -58,6 +69,8 @@ INSTALLED_APPS = [
     'rest_framework',  # new
     'api',  # new
     'twilio', # new
+    'boto3' # new
+    
 ]
 
 
@@ -122,6 +135,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/

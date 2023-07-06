@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from rest_framework import serializers
+from .models import Story
 
 class LoginSerializer(serializers.Serializer):
     country_code = serializers.IntegerField()
@@ -21,3 +21,13 @@ class LoginSerializer(serializers.Serializer):
         username = f"+{country_code}.{phone_number}"
         attrs['username'] = username
         return attrs
+
+class StorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Story
+        fields = ('id', 'title','content', 'age_range', 'gender', 'story_type', 'picture', 'length_minutes')
+
+        # Optional: You can add extra kwargs to customize the serializer behavior
+        extra_kwargs = {
+            'image': {'required': False},
+        }

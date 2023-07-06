@@ -35,22 +35,35 @@ class PendingCode(models.Model):
 
 
 class UserProfile(models.Model):
+    PROFILE_IMAGES = [
+        ('img1', 'Image 1'),
+        ('img2', 'Image 2'),
+        ('img3', 'Image 3'),
+        ('img4', 'Image 4'),
+    ]
     GENDER_CHOICES = [
         ('M', 'Male'),
         ('F', 'Female'),
-        ('O', 'Other'),
     ]
-
     STORY_TYPES = [
         ('action', 'Action'),
         ('adventure', 'Adventure'),
         ('comedy', 'Comedy'),
+        ('fantasy', 'Fantasy'),
+        ('mystery', 'Mystery'),
+        ('science_fiction', 'Science Fiction'),
+        ('fairy_tale', 'Fairy Tale'),
+        ('animal', 'Animal'),
+        ('educational', 'Educational'),
+        ('historical', 'Historical'),
         # Add more story types as needed
     ]
+
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='profiles')
     name = models.CharField(max_length=255)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    profileimg = models.CharField(default='img0',max_length=10, choices=PROFILE_IMAGES)
     age = models.PositiveIntegerField()
     scores = models.TextField(default=json.dumps({
         story_type: 0 for story_type, _ in STORY_TYPES
@@ -64,3 +77,48 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return (self.name)
+    
+
+
+
+
+class Story(models.Model):
+    LENGTH_CHOICES = (
+        (1, '1 minute'),
+        (2, '2 minutes'),
+        (5, '5 minutes'),
+        (10, '10 minutes'),
+    )
+    GENDER_CHOICES = [
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('A','Any'),
+    ]
+    STORY_TYPES = [
+    ('action', 'Action'),
+    ('adventure', 'Adventure'),
+    ('comedy', 'Comedy'),
+    ('fantasy', 'Fantasy'),
+    ('mystery', 'Mystery'),
+    ('science_fiction', 'Science Fiction'),
+    ('fairy_tale', 'Fairy Tale'),
+    ('animal', 'Animal'),
+    ('educational', 'Educational'),
+    ('historical', 'Historical'),
+    # Add more story types as needed
+    ]
+
+    title = models.CharField(max_length=100)
+    content = models.TextField()
+    age_range = models.IntegerField()
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    story_type = models.CharField(max_length=20, choices=STORY_TYPES)
+    picture = models.ImageField(default=None,upload_to='story_pictures')
+    length_minutes = models.PositiveIntegerField(choices=LENGTH_CHOICES, default=1)
+    validated = models.BooleanField(default=False)
+    audio_file = models.FileField(default=None,upload_to='media/audio_files', blank=True, null=True)
+    
+
+
+    def __str__(self):
+        return self.title
