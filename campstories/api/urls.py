@@ -13,6 +13,11 @@ urlpatterns = [
     path('RegisterWithPhoneNum/', views.RegisterWithPhoneNum, name='register'),
     path('CreateProfile/', views.CreateProfile, name='create_profile'),
     path('CustomStory/', views.CustomStory, name='custom_story'),
+    path('PhoneNumConfirm', views.PhoneNumConfirm, name='phone_num_confirm'),
+    path('VerifySignUpCode', views.VerifySignUpCode, name='verify_login_code'),
+    path('RegisterWithPhoneNum', views.RegisterWithPhoneNum, name='register_with_phone_num'),
+
+
     # path('users/', views.UserList.as_view()),
     # path('users/<int:pk>/', views.UserDetail.as_view()),
     # path('stories/<int:pk>/', views.StoryDetail.as_view()),

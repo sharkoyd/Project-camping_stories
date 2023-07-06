@@ -38,7 +38,7 @@ import random
 
 import re
 
-
+from . import utils
 
 import boto3
 from botocore.exceptions import BotoCoreError, NoCredentialsError
@@ -286,8 +286,7 @@ def LoginWithPhoneNum(request):
         pending_code.code = str(user.code)  # Set the code from user.code
         pending_code.save()  # Save the pending code
 
-        # Send the pending code to the user (sms, email, etc.)
-        #for now il just print it
+        utils.send_sms(phone_number, f"Your code is {pending_code.code}")
         print(pending_code.code)
 
         return Response({'message': 'Valid'})
@@ -295,6 +294,61 @@ def LoginWithPhoneNum(request):
         return Response({'message': 'Invalid'}, status=401)
 
 
+
+
+@api_view(['POST'])
+def PhoneNumConfirm(request):
+    country_code = request.data.get('country_code')
+    phone_number = request.data.get('phone_number')
+
+
+
+    username = f"+{country_code}.{phone_number}"
+
+    if User.objects.filter(username=username).exists():
+        return Response({'message': 'Invalid'}, status=409)
+    else:
+        user = User.objects.create_user(username=username, password='999999' ,is_active=False)
+        try:
+            pending_code = PendingCode.objects.get(user=user)
+        except PendingCode.DoesNotExist:
+            pending_code = PendingCode.objects.create(user=user)
+        pending_code.code = str(user.code)  # Set the code from user.code
+        pending_code.save()  # Save the pending code
+        phn=f"+{country_code}{phone_number}"
+        utils.send_sms(phn, f"Your code is {pending_code.code}")
+    return Response({'message': 'Valid'},status=200)
+
+
+@api_view(['POST'])
+def VerifySignUpCode(request):
+    code = request.data.get('verification_code')
+
+    if not code:
+        return Response({'message': 'Invalid'}, status=400)
+
+    try:
+        pending_code = PendingCode.objects.get(code=code)
+        user = pending_code.user
+    except PendingCode.DoesNotExist:
+        return Response({'message': 'Invalid'}, status=401)
+
+    if code == pending_code.code:
+        # Code is valid, generate JWT tokens for the user
+        refresh = RefreshToken.for_user(user)
+        access_token = refresh.access_token
+
+        # Delete the pending code
+        pending_code.delete()
+        #call the save method to generate a new code
+        user.code.save()
+        # Return the JWT tokens in the response
+        return Response({'message': 'Valid'}, status=200)
+        
+    else:
+        return Response({'message': 'Invalid'}, status=401)
+    
+    
 
 @api_view(['POST'])
 def VerifyLoginCode(request):
@@ -332,6 +386,7 @@ def VerifyLoginCode(request):
 
 @api_view(['POST'])
 def RegisterWithPhoneNum(request):
+
     phone_number = request.data.get('phone_number')
     country_code = request.data.get('country_code')
     password = request.data.get('password')
@@ -341,13 +396,14 @@ def RegisterWithPhoneNum(request):
 
     username = f"+{country_code}.{phone_number}"
 
-    # Check if a user with the provided username already exists
     if User.objects.filter(username=username).exists():
-        return Response({'message': 'user already exists'}, status=status.HTTP_409_CONFLICT)
-
-    # Create the user
-    user = User.objects.create_user(username=username, password=password , first_name=first_name , last_name=last_name)
-
+        #update the user
+        user = User.objects.get(username=username)
+        user.first_name = first_name
+        user.last_name = last_name
+        user.set_password(password)
+        user.is_active = True
+        user.save()
 
     return Response({'message': 'success'}, status=status.HTTP_201_CREATED)
 
