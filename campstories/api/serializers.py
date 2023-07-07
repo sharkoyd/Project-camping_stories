@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Story
+from .models import Story, StoryPictureRand
 
 class LoginSerializer(serializers.Serializer):
     country_code = serializers.IntegerField()
@@ -22,12 +22,17 @@ class LoginSerializer(serializers.Serializer):
         attrs['username'] = username
         return attrs
 
+class PictureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StoryPictureRand
+        fields = ['picture']# Replace with actual fields of Picture model
+
 class StorySerializer(serializers.ModelSerializer):
+    picture = PictureSerializer()  # Nested serializer for the picture field
+
     class Meta:
         model = Story
-        fields = ('id', 'title','content', 'age_range', 'gender', 'story_type', 'picture', 'length_minutes')
-
-        # Optional: You can add extra kwargs to customize the serializer behavior
+        fields = ['id', 'title', 'content', 'age_range', 'gender', 'story_type', 'picture', 'length_minutes', 'audio_file']
         extra_kwargs = {
             'image': {'required': False},
         }

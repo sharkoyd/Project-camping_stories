@@ -51,8 +51,8 @@ class UserProfile(models.Model):
         ('comedy', 'Comedy'),
         ('fantasy', 'Fantasy'),
         ('mystery', 'Mystery'),
-        ('science_fiction', 'Science Fiction'),
-        ('fairy_tale', 'Fairy Tale'),
+        ('science fiction', 'Science Fiction'),
+        ('fairy tale', 'Fairy Tale'),
         ('animal', 'Animal'),
         ('educational', 'Educational'),
         ('historical', 'Historical'),
@@ -62,11 +62,8 @@ class UserProfile(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='profiles')
     name = models.CharField(max_length=255)
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
-
     profileimg = models.CharField(default='img0',max_length=10, choices=PROFILE_IMAGES)
     age = models.PositiveIntegerField()
-    interests
     scores = models.TextField(default=json.dumps({
         story_type: 0 for story_type, _ in STORY_TYPES
     }))  # Field to store story scores

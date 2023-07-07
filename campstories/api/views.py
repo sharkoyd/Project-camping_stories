@@ -63,24 +63,13 @@ async def make_api_request(url, params=None):
 
 @api_view(['GET'])
 def Home(request):
-    # Get the token from the query parameters
-    token = request.query_params.get('token')
-    print(token)
-
-    try:
-        # Manually authenticate the user using the token
-        authentication = JWTAuthentication()
-        validated_token = authentication.get_validated_token(token)
-        user = authentication.get_user(validated_token)
-        # Assign the authenticated user to request.user
-        request.user = user
-        print(user)
-    except:
-        return Response({'message': 'Invalid token'}, status=401)
-
-    # Get the profile ID from the request
+    user = utils.AuthCheck(request)
+    if user is None : 
+        return JsonResponse({'message': 'You are not logged In'}, status=404)
+    # Check if the user has associated profiles
+    
     profile_id = request.query_params.get('profile_id')
-
+    request.user = user
     # Get the user's profile
     # also performs as a  check for if the profile does not belong to the logged-in user
     profile = get_object_or_404(UserProfile, id=profile_id, user=user)
@@ -91,10 +80,16 @@ def Home(request):
     age_range_min = profile.age - 3
     age_range_max = profile.age + 3
 
-    number_of_stories_to_fetch = 2
+    number_of_stories_to_fetch = 3
 
+
+     # Get the highest score type
+    highest_score_type = max(profile.get_scores(), key=profile.get_scores().get)
+
+    # Fetch recommended stories from the database within the age range
 
     # Fetch random stories from the database within the age range
+    recommended = Story.objects.filter(age_range__gte=age_range_min, age_range__lte=age_range_max, story_type=highest_score_type).order_by('?')[:number_of_stories_to_fetch]
     one_minute_stories = Story.objects.filter(age_range__gte=age_range_min, age_range__lte=age_range_max, length_minutes=1).order_by('?')[:number_of_stories_to_fetch]
     three_minute_stories = Story.objects.filter(age_range__gte=age_range_min, age_range__lte=age_range_max, length_minutes=3).order_by('?')[:number_of_stories_to_fetch]
     five_minute_stories = Story.objects.filter(age_range__gte=age_range_min, age_range__lte=age_range_max, length_minutes=5).order_by('?')[:number_of_stories_to_fetch]
@@ -104,10 +99,13 @@ def Home(request):
     one_minute_serializer = StorySerializer(one_minute_stories, many=True)
     three_minute_serializer = StorySerializer(three_minute_stories, many=True)
     five_minute_serializer = StorySerializer(five_minute_stories, many=True)
+    recommended_serializer = StorySerializer(recommended, many=True)
+    print(recommended_serializer.data)
     ten_minute_serializer = StorySerializer(ten_minute_stories, many=True)
 
     # Return the serialized stories
     return Response({
+        'recommended': recommended_serializer.data,
         'one_minute_stories': one_minute_serializer.data,
         'three_minute_stories': three_minute_serializer.data,
         'five_minute_stories': five_minute_serializer.data
@@ -277,8 +275,18 @@ def Profiles(request):
     if profiles.exists():
         # Serialize the profiles to JSON
         serialized_profiles = serializers.serialize('json', profiles)
-        print (serialized_profiles)
-        return JsonResponse({'profiles': serialized_profiles}, status=200)
+        #print (serialized_profiles)
+        print (profiles)
+        profile_list = []
+        for profile in profiles:
+            profile_info = {
+                'profile_id' :profile.id, 
+                'name': profile.name,
+                'profileimg': profile.profileimg,
+            }
+            profile_list.append(profile_info)
+        print(profile_list)
+        return JsonResponse({'profiles': profile_list}, status=200)
     else:
         return JsonResponse({'profiles': None}, status=200)
 
@@ -308,7 +316,7 @@ def LoginWithPhoneNum(request):
         } , status=200)
         
     else:
-        return Response({'message': 'Invalid'}, status=401)
+        return Response({'message': 'Wrong Password or Phone number'}, status=401)
 
 
 
@@ -409,33 +417,49 @@ def RegisterWithPhoneNum(request):
 
 @api_view(['POST'])
 def CreateProfile(request):
+    print (request.data)
     user = utils.AuthCheck(request)
     if user is None : 
         return JsonResponse({'message': 'You are not logged In'}, status=404)
-
+    
     try:
-        user = request.user
         # Extract the necessary information from the request data
+        
+       
         name = request.data.get('name')
-        gender = request.data.get('gender')
         age = request.data.get('age')
         profilepic = request.data.get('profilepic')
-        interests = request.data.get('interests')
-
+        
+        interest = request.data.get('interests').lower()
+        # Retrieve the UserProfile instance
         # Create a profile for the authenticated user
-        profile = UserProfile(user=user, name=name, gender=gender, age=age, profilepic=profilepic)
-        profile.save()
+       
+        user_profile = UserProfile(user=user, name=name, age=age, profileimg=profilepic)
+        
+        user_profile.save()
+        
+        # Access the scores field and convert it to a Python dictionary
+        scores = json.loads(user_profile.scores)
+        
+        # Update a specific field in the scores dictionary
+        print (scores)
+        print (interest)
+        scores[interest] += 1  # Update the 'action' field (example)
+        print ("ccccccccccccccccccccccccccc")
+        # Convert the updated scores dictionary back to JSON
+        updated_scores = json.dumps(scores)
 
-        # Set the interests in the profile JSON data
-        profile_data = profile.data
-        profile_data['interests'] = {interest: 1 for interest in interests}
-        profile.data = profile_data
-        profile.save()
+        # Set the updated scores value to the scores field of the UserProfile instance
+        user_profile.scores = updated_scores
+
+        # Save the UserProfile instance
+        user_profile.save()
+        
 
         # Return a success response
         return Response({'message': 'Profile created successfully'})
     except:
-        return Response({'message': 'Invalid params'}, status=401)
+        return Response({'message': 'Invalid params'}, status=404)
 
 
     

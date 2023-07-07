@@ -21,10 +21,11 @@ def send_sms(phone_number, content):
 
 def generate_audio(story):
     polly_client = boto3.client('polly')
+    print ("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
     ssml = f"<speak><prosody rate='slow'>{story.content}</prosody></speak>"
     response = polly_client.synthesize_speech(TextType='ssml', Text=ssml, OutputFormat='mp3', VoiceId='Joanna')
     audio_stream = response['AudioStream'].read()
-
+    
     # Create the ContentFile from the audio stream
     audio_file = ContentFile(audio_stream)
 
