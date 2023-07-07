@@ -9,7 +9,6 @@ urlpatterns = [
     path('', views.Home, name='home'),
     path('Profiles', views.Profiles, name='profiles'),
     path('LoginWithPhoneNum/', views.LoginWithPhoneNum, name='login'),
-    path('VerifyLoginCode/', views.VerifyLoginCode, name='verifylogin'),
     path('RegisterWithPhoneNum/', views.RegisterWithPhoneNum, name='register'),
     path('CreateProfile/', views.CreateProfile, name='create_profile'),
     path('CustomStory/', views.CustomStory, name='custom_story'),

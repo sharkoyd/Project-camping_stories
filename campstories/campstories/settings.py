@@ -37,7 +37,7 @@ SECRET_KEY = 'django-insecure-ex9)sv6ul=$&)_9ihl92=!szsthc#1v6xs2bb53o*2&(9w+@@2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["192.168.1.14","127.0.0.1"]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -49,8 +49,8 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
      'AUTH_HEADER_TYPES': ('JWT',), # only JWT is accepted
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=2),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=14),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=14),
     'SIGNING_KEY': '$g+=#-p&!e+a9jf*6nnrvxm%2h#bc-ji@j3lqn8jq41b2b99q#',
 }
 
@@ -69,8 +69,9 @@ INSTALLED_APPS = [
     'rest_framework',  # new
     'api',  # new
     'twilio', # new
-    'boto3' # new
-    
+    'boto3', # new
+    'corsheaders'
+
 ]
 
 
@@ -83,6 +84,13 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+]
+
+#CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST = [
+    'http://*',
+    'https://*',
 ]
 
 ROOT_URLCONF = 'campstories.urls'
