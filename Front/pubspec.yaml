@@ -1,0 +1,46 @@
+name: CampStories
+description: A new Flutter project.
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=2.19.6 <3.0.0'
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.2
+  get: ^4.6.5
+  google_fonts: ^4.0.4
+  intl_phone_number_input: ^0.7.3+1
+  persistent_bottom_nav_bar: ^5.0.2
+  shared_preferences: ^2.0.18
+  audioplayers: ^4.1.0
+  flutter_svg: ^2.0.5
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+  flutter_lints: ^2.0.0
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+  uses-material-design: true
+  assets:
+    - images/
+#  fonts:
+#    - family: century
+#      fonts:
+#        - asset: fonts/CenturyGothic.ttf
